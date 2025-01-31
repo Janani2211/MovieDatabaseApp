@@ -4,6 +4,7 @@ import MovieNavBar from '../MovieNavBar'
 import MoviePoster from '../MoviePoster'
 
 import './index.css'
+import Pagination from '../Pagination'
 
 const apiStatus = {
   initial: 'INITIAL',
@@ -14,9 +15,28 @@ const apiStatus = {
 const PopularMovies = () => {
   const [moviesList, setMoviesList] = useState([])
   const [fetchApiStatus, setFetchApiStatus] = useState(apiStatus.initial)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [maxPages, setMaxPages] = useState()
+  const totalPages = 10
+  const onPageChange = page => {
+    setCurrentPage(page)
+  }
+  const onPrevClick = () => {
+    if (currentPage > 1) {
+      const pageNo = currentPage - 1
+      setCurrentPage(pageNo)
+    }
+  }
+  const onNextClick = () => {
+    if (currentPage < maxPages) {
+      const pageNo = currentPage + 1
+      setCurrentPage(pageNo)
+    }
+  }
 
   const updatedMovieData = data => {
     const moviesDataList = data.results
+    setMaxPages(data.total_pages)
 
     const updatedMoviesDataList = moviesDataList.map(eachMovie => ({
       movieId: eachMovie.id,
@@ -29,8 +49,7 @@ const PopularMovies = () => {
   }
 
   useEffect(() => {
-    const getPopularMoviesURL =
-      'https://api.themoviedb.org/3/movie/popular?api_key=819fed71625699e4528f2e4ed98137c9&language=en-US&page=1'
+    const getPopularMoviesURL = `https://api.themoviedb.org/3/movie/popular?api_key=819fed71625699e4528f2e4ed98137c9&language=en-US&page=${currentPage}`
     const options = {
       method: 'GET',
     }
@@ -50,7 +69,7 @@ const PopularMovies = () => {
       }
     }
     fetchData()
-  }, [])
+  }, [currentPage])
 
   const loadingPage = () => (
     <div className="loader-style">
@@ -81,6 +100,13 @@ const PopularMovies = () => {
     <div className="bg-color">
       <MovieNavBar />
       {switchCase()}
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onNextClick={onNextClick}
+        onPrevClick={onPrevClick}
+        onSelectPage={onPageChange}
+      />
     </div>
   )
 }
